@@ -15,7 +15,7 @@ import frappe.permissions
 import frappe.share
 import re
 import json
-
+from frappe.core.doctype.user_permission import user_permission
 from frappe.website.utils import is_signup_enabled
 from frappe.utils.background_jobs import enqueue
 
@@ -49,6 +49,7 @@ class User(Document):
 
 	def after_insert(self):
 		create_notification_settings(self.name)
+		self.validate_user_permission()
 
 	def validate(self):
 		self.check_demo()
@@ -83,7 +84,6 @@ class User(Document):
 			self.set_social_login_userid("frappe", frappe.generate_hash(length=39))
 
 		self.validate_company()
-		self.validate_user_permission()
 
     				
     		
@@ -94,12 +94,13 @@ class User(Document):
 			return
 		else:
 			user_perms = user_permission.get_user_permissions(self)
-			for up in user_perms:
-				#at least one company need to be selected in user permission
-				if up.allow == "Company" and up.value == self.company:
-					return
-
-			frappe.throw(_("Non-system manager should have at least one user permsssion"))
+			if not user_perms:
+				user_permission.insert_user_perm(self.name,"Company",self.company,1,apply_to_all = 1)
+			else:	
+				for up in user_perms:
+					#at least one company need to be selected in user permission
+					if up.allow == "Company" and up.value == self.company:
+						return
 	
 	def validate_company(self):
 		if "System Manager" in [user_role.role for user_role in self.get("roles")] or self.name  == "Administrator" or self.name == "Guest":
