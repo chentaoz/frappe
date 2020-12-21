@@ -102,10 +102,12 @@ class User(Document):
 			frappe.throw(_("Non-system manager should have at least one user permsssion"))
 	
 	def validate_company(self):
-    	if "System Manager" in [user_role.role for user_role in self.get("roles")] or self.name  == "Administrator" or self.name == "Guest":
-    			return
+		if "System Manager" in [user_role.role for user_role in self.get("roles")] or self.name  == "Administrator" or self.name == "Guest":
+			return
 		else if not self.company:
-    			frappe.throw(_("Non-system manager or guest should have at least one user permsssion"))
+			frappe.throw(_("Non-system manager or guest should have at least one user permsssion"))
+		else:
+			return
 
 	def validate_roles(self):
 		if self.role_profile_name:
