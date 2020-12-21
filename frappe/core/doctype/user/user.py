@@ -82,6 +82,33 @@ class User(Document):
 		if (self.name not in ["Administrator", "Guest"]) and (not self.get_social_login_userid("frappe")):
 			self.set_social_login_userid("frappe", frappe.generate_hash(length=39))
 
+		self.validate_company()
+		self.validate_user_permission()
+	
+
+
+
+    def validate_company(self):
+		if "System Manager" in [user_role.role for user_role in self.get("roles")] or self.name  == "Administrator" or self.name == "Guest":
+    			return
+		else if not self.company:
+    			frappe.throw(_("Non-system manager or guest should have at least one user permsssion"))
+    				
+    		
+    		
+	def validate_user_permission(self):
+		# Non system manager user should have at least one Company based user permission
+		if "System Manager" in [user_role.role for user_role in self.get("roles")] or self.name  == "Administrator" or self.name == "Guest":
+			return
+		else:
+			user_perms = user_permission.get_user_permissions(self)
+			for up in user_perms:
+				#at least one company need to be selected in user permission
+				if up.allow == "Company" and up.value == self.company:
+					return
+
+			frappe.throw(_("Non-system manager should have at least one user permsssion"))
+
 	def validate_roles(self):
 		if self.role_profile_name:
 				role_profile = frappe.get_doc('Role Profile', self.role_profile_name)

@@ -9,6 +9,8 @@
   "sb0_5",
   "enabled",
   "section_break_3",
+  "company",
+  "section_break_company",
   "email",
   "first_name",
   "middle_name",
@@ -96,6 +98,16 @@
    "depends_on": "enabled",
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+    "fieldname": "company",
+    "fieldtype": "Link",
+    "label": "Company",
+    "options": "Company"
+  },
+  {
+    "fieldname": "section_break_company",
+    "fieldtype": "Section Break"
   },
   {
    "fieldname": "email",
